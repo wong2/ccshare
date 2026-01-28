@@ -1,0 +1,28 @@
+{
+  "name": "@ccshare/cli",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "ccshare": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.7"
+  },
+  "dependencies": {
+    "@ccshare/sdk": "workspace:*",
+    "@inquirer/core": "^11.1.1",
+    "@inquirer/prompts": "^8.2.0",
+    "@inquirer/type": "^4.0.3",
+    "chalk": "^5.6.2"
+  }
+}
