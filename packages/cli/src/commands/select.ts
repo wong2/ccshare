@@ -37,26 +37,35 @@ export async function selectSession(sessions: SessionEntry[]): Promise<SessionEn
     const date = formatDate(session.modified);
     const branch = session.gitBranch ? chalk.cyan(`[${session.gitBranch}]`) : "";
 
-    const prompt = session.firstPrompt
-      ? chalk.white(truncate(cleanPrompt(session.firstPrompt), 50))
-      : chalk.gray("(no prompt)");
-
-    const name = [chalk.magenta(project), prompt, chalk.gray(msgCount), chalk.gray(date), branch]
+    const header = [chalk.magenta(project), chalk.gray(msgCount), chalk.gray(date), branch]
       .filter(Boolean)
       .join("  ");
 
+    const promptLine = session.firstPrompt
+      ? `  ${chalk.gray("→")} ${truncate(cleanPrompt(session.firstPrompt), 70)}`
+      : `  ${chalk.gray("→")} ${chalk.gray("(no prompt)")}`;
+
     const searchText = buildSearchText(session, stripPrefix);
 
-    return { name, value: session, searchText };
+    return { header, promptLine, value: session, searchText };
   });
+
+  function toChoices(filtered: typeof items) {
+    return filtered.map((item, i) => {
+      const suffix = i === filtered.length - 1 ? "" : "\n";
+      const name = `${item.header}\n${item.promptLine}${suffix}`;
+      return { name, value: item.value };
+    });
+  }
 
   return search({
     message: "Select a session to share:",
     pageSize: 20,
     source: async (input) => {
-      if (!input) return items;
-      const term = input.toLowerCase();
-      return items.filter((item) => item.searchText.includes(term));
+      const filtered = input
+        ? items.filter((item) => item.searchText.includes(input.toLowerCase()))
+        : items;
+      return toChoices(filtered);
     },
   });
 }

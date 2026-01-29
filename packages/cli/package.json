@@ -1,28 +1,50 @@
 {
-  "name": "@ccshare/cli",
+  "name": "@ccshare/viewer",
   "version": "0.0.1",
+  "description": "Share your Claude Code sessions",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "bin": {
-    "ccshare": "./dist/index.js"
+    "ccshare": "./dist/index.mjs"
   },
   "files": [
-    "dist"
+    "dist",
+    "renderer"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsdown && pnpm run copy-renderer",
+    "copy-renderer": "rm -rf renderer && cp -r ../renderer/dist renderer",
     "dev": "tsc --watch",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist renderer",
+    "prepublishOnly": "pnpm run build"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "session",
+    "share"
+  ],
+  "author": "wong2",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wong2/ccshare"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "devDependencies": {
-    "@types/node": "^22.10.7"
+    "@ccshare/sdk": "workspace:*",
+    "@types/node": "^22.10.7",
+    "tsdown": "^0.20.1"
   },
   "dependencies": {
-    "@ccshare/sdk": "workspace:*",
     "@inquirer/core": "^11.1.1",
     "@inquirer/prompts": "^8.2.0",
     "@inquirer/type": "^4.0.3",
-    "chalk": "^5.6.2"
+    "chalk": "^5.6.2",
+    "get-port-please": "^3.2.0",
+    "open": "^11.0.0"
   }
 }

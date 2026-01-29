@@ -1,11 +1,17 @@
 #!/usr/bin/env node
 
 import chalk from "chalk";
+import open from "open";
 import { ExitPromptError } from "@inquirer/core";
 import { listProjects, listSessions, readSession } from "@ccshare/sdk";
-import type { SessionEntry } from "@ccshare/sdk";
+import type { SessionEntry, Session } from "@ccshare/sdk";
 import { selectSession } from "./commands/select.js";
-import { truncate, extractText } from "./utils/format.js";
+import { startServer } from "./utils/server.js";
+
+function sanitizeSession(session: Session): Omit<Session, "fullPath" | "projectPath"> {
+  const { fullPath, projectPath, ...rest } = session;
+  return rest;
+}
 
 async function main() {
   console.log();
@@ -36,27 +42,19 @@ async function main() {
   console.log();
 
   const session = readSession(entry);
+  const sanitized = sanitizeSession(session);
 
-  console.log(chalk.bold.cyan(`━━━ Session: ${session.sessionId} ━━━`));
-  console.log(chalk.gray(`Messages: ${session.messageCount} | Modified: ${session.modified}`));
-  if (session.gitBranch) {
-    console.log(chalk.gray(`Branch: ${session.gitBranch}`));
-  }
+  // Start local server
+  console.log(chalk.gray("Starting local server..."));
+  const { url } = await startServer(sanitized);
+
+  console.log(chalk.green(`✔ Server running at ${chalk.cyan(url)}`));
   console.log();
+  console.log(chalk.gray("Opening browser..."));
 
-  for (const msg of session.messages) {
-    const text = extractText(msg.content);
-    if (!text) continue;
+  await open(url);
 
-    if (msg.role === "user") {
-      console.log(chalk.blue.bold("User:"));
-      console.log(text);
-    } else {
-      console.log(chalk.green.bold("Assistant:"));
-      console.log(text.length > 500 ? truncate(text, 500) : text);
-    }
-    console.log();
-  }
+  console.log(chalk.gray("Press Ctrl+C to stop the server"));
 }
 
 main().catch((error) => {
